@@ -138,6 +138,35 @@ st.markdown("""
   .role-staff{background:#eef1f5; color:var(--ink-2);}
   .pwd-mono{font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background:#f4f5f7; padding:2px 7px; border-radius:5px; font-size:12px;}
   .footer-note{text-align:center; padding:16px; font-size:11px; color:var(--muted);}
+
+  .quick-nav{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 18px;}
+  .quick-nav a{font-size:12.5px; color:var(--blue-dark); background:#f4ead7; padding:7px 14px; border-radius:20px;
+    text-decoration:none; font-weight:700; border:1px solid #e4d3a8; cursor:pointer; white-space:nowrap;}
+  .quick-nav a:hover{background:#eddfbf;}
+  .sec-title{font-size:17px; font-weight:800; color:var(--navy); margin:6px 0 10px; display:flex; align-items:center; gap:8px; scroll-margin-top:64px;}
+
+  /* ===== Responsive: tablet & mobile ===== */
+  @media (max-width: 900px){
+    .block-container{padding-left:0.7rem; padding-right:0.7rem;}
+    .app-header{padding:12px 14px;}
+    .app-header h1{font-size:15.5px; line-height:1.3;}
+    .app-header .sub{font-size:11px;}
+    .app-header .brand-logo{width:34px; height:34px; font-size:17px;}
+    table{font-size:12px;}
+    thead th{font-size:10.5px; padding:7px 8px; white-space:nowrap; word-break:normal;}
+    tbody td, tfoot td{padding:7px 8px; white-space:nowrap;}
+    .stat-tile{padding:11px 12px;}
+    .stat-tile .stat-value{font-size:18px;}
+    .quick-nav a{padding:6px 11px; font-size:12px;}
+  }
+  @media (max-width: 560px){
+    .stat-grid{grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:8px;}
+    .name{font-size:13.5px;}
+    .role{font-size:10.5px;}
+    .date-badge{font-size:11px; padding:6px 10px;}
+    table{font-size:11px;}
+    .avatar{width:32px; height:32px; font-size:12px;}
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -905,13 +934,24 @@ def main():
         if not e:
             st.markdown('<div class="warn-box">Tài khoản này chưa có dữ liệu KPI/Thưởng/Khách hàng tương ứng trong file dữ liệu hiện tại. Vui lòng liên hệ Admin nếu đây là tài khoản mới.</div>', unsafe_allow_html=True)
         else:
-            tab1, tab2, tab3 = st.tabs(["📈 Tỷ lệ hoàn thành KPI", "💰 Thưởng", "👥 Danh sách khách hàng"])
-            with tab1:
-                render_kpi_section(e)
-            with tab2:
-                render_thuong_section(e)
-            with tab3:
-                render_kh_section(e)
+            st.markdown("""
+            <div class="quick-nav">
+              <a href="#sec-kpi">📈 Tỷ lệ hoàn thành KPI</a>
+              <a href="#sec-thuong">💰 Thưởng</a>
+              <a href="#sec-kh">👥 Danh sách khách hàng</a>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown('<div id="sec-kpi" class="sec-title">📈 Tỷ lệ hoàn thành KPI</div>', unsafe_allow_html=True)
+            render_kpi_section(e)
+
+            st.divider()
+            st.markdown('<div id="sec-thuong" class="sec-title">💰 Thưởng</div>', unsafe_allow_html=True)
+            render_thuong_section(e)
+
+            st.divider()
+            st.markdown('<div id="sec-kh" class="sec-title">👥 Danh sách khách hàng</div>', unsafe_allow_html=True)
+            render_kh_section(e)
 
     st.markdown(f'<div class="footer-note">© 2026 Khối Dịch vụ khách hàng · Báo cáo tự động từ dữ liệu KPI ngày {esc(report_date or "-")}'
                 f'<br>Dữ liệu bảo mật — chỉ hiển thị thông tin của tài khoản đã đăng nhập.<br>'
