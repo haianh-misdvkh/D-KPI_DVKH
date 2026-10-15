@@ -564,7 +564,7 @@ def render_login(accounts):
 
             st.divider()
             st.caption("Mật khẩu mặc định lần đầu: **123456** — vui lòng đổi sau khi đăng nhập.")
-            st.markdown('<div class="footer-note" style="padding:0;">made by Dungpv-QC_DVKH</div>', unsafe_allow_html=True)
+            st.markdown('<div class="footer-note" style="padding:0;">made by MIS_DVKH</div>', unsafe_allow_html=True)
 
 # ============================================================================
 # Toolbar sau đăng nhập
@@ -943,7 +943,7 @@ def main():
 
     if not st.session_state.auth:
         render_login(accounts)
-        st.markdown('<div class="footer-note">© 2026 Khối Dịch vụ khách hàng · made by Dungpv-QC_DVKH</div>', unsafe_allow_html=True)
+        st.markdown('<div class="footer-note">© 2026 Khối Dịch vụ khách hàng · made by MIS_DVKH</div>', unsafe_allow_html=True)
         return
 
     uid = st.session_state.uid
@@ -981,7 +981,7 @@ def main():
 
     st.markdown(f'<div class="footer-note">© 2026 Khối Dịch vụ khách hàng · Báo cáo tự động từ dữ liệu KPI ngày {esc(report_date or "-")}'
                 f'<br>Dữ liệu bảo mật — chỉ hiển thị thông tin của tài khoản đã đăng nhập.<br>'
-                f'<span style="opacity:.55;">made by Dungpv-QC_DVKH</span></div>', unsafe_allow_html=True)
+                f'<span style="opacity:.55;">made by MIS_DVKH</span></div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
