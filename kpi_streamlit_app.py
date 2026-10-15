@@ -58,7 +58,9 @@ DEFAULT_STAFF_PASSWORD = "123456"
 DEFAULT_ADMIN_PASSWORD = "Admin@2026"
 
 TEAM2_KEYWORDS = ["Hỗ trợ tổng đài Miền Bắc", "Hỗ trợ tổng đài Miền Nam"]
+SPECIAL_TEAM_KEYWORDS = ["Hỗ trợ tổng đài Miền Bắc", "Hỗ trợ tổng đài Miền Nam", "Tổng đài 1", "Hà Nội 1", "Hồ Chí Minh 1"]
 KH_COLUMNS_PROCESSED = ['Tên KH', 'Mã TC', 'POS_BOM', 'DPD_BOM', 'MAX_BUCKET', 'Tổng dư nợ', 'Dư ví', 'Tên nhân viên', 'Tổng thu', 'UNRESOLVED_MAX']
+KH_COLUMNS_UNPROCESSED = ['Tên KH', 'Mã TC', 'POS_BOM', 'DPD_BOM', 'MAX_BUCKET', 'Tổng dư nợ', 'Dư ví', 'Tên nhân viên', 'Tổng thu', 'UNRESOLVED_MAX']
 KH_COLUMNS_WALLET = ['Tên KH', 'Mã TC', 'POS_BOM', 'DPD_BOM', 'MAX_BUCKET', 'Tổng dư nợ', 'Dư ví', 'Tên nhân viên', 'Tổng thu']
 KH_NUMERIC = {'POS_BOM', 'DPD_BOM', 'Tổng dư nợ', 'Dư ví', 'Tổng thu', 'UNRESOLVED_MAX'}
 KH_DECIMALS = {'POS_BOM': 1, 'DPD_BOM': 0, 'Tổng dư nợ': 1, 'Dư ví': 1, 'Tổng thu': 1, 'UNRESOLVED_MAX': 0}
@@ -405,13 +407,21 @@ def parse_customers(file_path, employees):
         col = 'Tên nhân viên 2' if use_col2 else 'Tên nhân viên'
         sub = df[df[col] == uid]
 
-        processed = sub[(sub['UNRESOLVED_MAX'] == 1) & (sub['Tổng thu'].fillna(0) != 0)]
+        is_special_team = any(k in team for k in SPECIAL_TEAM_KEYWORDS)
+        if is_special_team:
+            processed = sub[sub['UNRESOLVED_MAX'] == 0]
+            unprocessed = sub[sub['UNRESOLVED_MAX'] == 1]
+        else:
+            processed = sub[sub['Tổng thu'].fillna(0) != 0]
+            unprocessed = sub.iloc[0:0]
         wallet = sub[sub['Dư ví'].fillna(0) != 0]
 
         e["kh_processed"] = [clean_row(r, KH_COLUMNS_PROCESSED) for r in
                               processed[KH_COLUMNS_PROCESSED].replace({np.nan: None}).values.tolist()]
         e["kh_wallet"] = [clean_row(r, KH_COLUMNS_WALLET) for r in
                            wallet[KH_COLUMNS_WALLET].replace({np.nan: None}).values.tolist()]
+        e["kh_unprocessed"] = [clean_row(r, KH_COLUMNS_UNPROCESSED) for r in
+                                unprocessed[KH_COLUMNS_UNPROCESSED].replace({np.nan: None}).values.tolist()]
 
 @st.cache_data(show_spinner="Đang đọc dữ liệu từ file KPI...")
 def load_all_data(file_path, _mtime):
@@ -790,15 +800,28 @@ def render_kh_table(cols, rows, prefix):
         st.session_state[page_key] = total_pages; st.rerun()
 
 def render_kh_section(e):
+    team = e.get('phong_bo_phan', '') or ''
+    is_special_team = any(k in team for k in SPECIAL_TEAM_KEYWORDS)
+
     st.markdown(f'<div class="badge-count">{fmt_num(len(e["kh_processed"]), 0)} khách hàng</div>', unsafe_allow_html=True)
     st.markdown("#### 📗 Bảng 1 - Danh sách KH đã xử lý")
-    st.markdown('<div class="note-box">Điều kiện: UNRESOLVED_MAX = 1 và Tổng thu khác 0. <i>Chỉ xem, không tải về.</i></div>', unsafe_allow_html=True)
+    if is_special_team:
+        st.markdown('<div class="note-box">Điều kiện: UNRESOLVED_MAX = 0. <i>Chỉ xem, không tải về.</i></div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="note-box">Điều kiện: Tổng thu khác 0. <i>Chỉ xem, không tải về.</i></div>', unsafe_allow_html=True)
     render_kh_table(KH_COLUMNS_PROCESSED, e['kh_processed'], "khp")
+
+    if is_special_team:
+        st.divider()
+        st.markdown(f'<div class="badge-count">{fmt_num(len(e["kh_unprocessed"]), 0)} khách hàng</div>', unsafe_allow_html=True)
+        st.markdown("#### 📙 Bảng 2 - Danh sách KH chưa xử lý")
+        st.markdown('<div class="note-box">Điều kiện: UNRESOLVED_MAX = 1. <i>Chỉ xem, không tải về.</i></div>', unsafe_allow_html=True)
+        render_kh_table(KH_COLUMNS_UNPROCESSED, e['kh_unprocessed'], "khu")
 
     st.divider()
 
     st.markdown(f'<div class="badge-count">{fmt_num(len(e["kh_wallet"]), 0)} khách hàng</div>', unsafe_allow_html=True)
-    st.markdown("#### 📘 Bảng 2 - Danh sách KH có dư ví")
+    st.markdown("#### 📘 Bảng 3 - Danh sách KH có dư ví")
     st.markdown('<div class="note-box">Điều kiện: Dư ví khác 0. <i>Chỉ xem, không tải về.</i></div>', unsafe_allow_html=True)
     render_kh_table(KH_COLUMNS_WALLET, e['kh_wallet'], "khw")
 
