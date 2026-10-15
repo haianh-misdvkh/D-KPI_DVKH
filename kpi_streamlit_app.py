@@ -320,6 +320,7 @@ def parse_kpi_giao(rows, fmt_rows=None):
                 "ten": clean(r[9]), "trong_so": r[10], "du_no_giao": r[11], "chi_tieu": r[12],
                 "chi_tieu_is_pct": chi_tieu_is_pct,
                 "th_tinh_thuong": r[13], "thuc_hien": r[14], "pct_thuc_hien": r[15], "kpi": r[16],
+                "kpi_tinh_thuong": num(r[17]), "muc_tien_thuong_co_so": num(r[18]), "tong_thuong": num(r[26]),
             })
         employees[user_id] = emp
     return employees
@@ -650,7 +651,9 @@ def render_kpi_section(e):
           <td class="num">{fmt_num(d.get("thuc_hien"))}</td>
           <td class="num">{fmt_pct(d["pct_thuc_hien"]) if d.get("pct_thuc_hien") is not None else "-"}</td>
           <td class="num"><b>{fmt_pct(d["kpi"]) if d.get("kpi") is not None else "-"}</b></td>
-          <td class="num">-</td><td class="num">-</td><td class="num">-</td>
+          <td class="num">{fmt_pct(d["kpi_tinh_thuong"]) if d.get("kpi_tinh_thuong") is not None else "-"}</td>
+          <td class="num">{fmt_num(d.get("muc_tien_thuong_co_so"))}</td>
+          <td class="num">{fmt_num(d.get("tong_thuong"))}</td>
         </tr>''')
     if not rows_html:
         rows_html = ['<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px;">Không có dữ liệu chi tiết chỉ tiêu.</td></tr>']
